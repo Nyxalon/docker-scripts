@@ -1,0 +1,85 @@
+stacks:
+    monitoring.stack.yml
+        - one swarm stack that launches the following:
+            1. prometheus
+            2. grafana
+            3. loki
+            4. promtail - linux
+            5. tempo
+            6. open telemetry collector
+            7. c-advisor
+            8. node exporter
+            9. alert manager
+
+
+configs:
+    prometheus:
+        prometheus.yml
+            - scrap swarm tasks, node exporter, c-advisor, docker engine metrics and windows nodes.
+        rules/
+            - holds all the recording or alerting rules.
+
+    grafana:
+        provisioning/
+            - auto provisions for prometheus/loki/tempo data sources
+        dashboards/
+            - json dashboards
+
+    loki:
+        config.yml
+            - single binary loki with file system storage.
+
+    promtail:
+        linux-config.yml
+            - scraps container logs from linux nodes via docker_sd => ships to loki.
+        windows-config.yml
+            - scraps windows container json logs + application event logs => ships to loki.
+
+    tempo:
+        tempo.yml
+            - monolithic tempo with local storage
+
+    otel:
+        otel-collector.yml
+            - accepts otlp and forwards traces to tempo. exposes prometheus metrics from otel as needed.
+
+    alerting:
+        alertmanager.yml
+            - prometheus alert manager
+
+
+exporters:
+    windows:
+        - small powershell scripts to install windows_exporter as a service and open firewall on 9182.
+        - prometheus targets are configured in prometheus.yml.
+
+
+reverse-proxy:
+    - examples for traefik or nginx - in case of endpoint configs like:
+        grafana.${domain}, prometheus.${domain}, loki.${domain}, tempo.${domain}, alerts.${domain}
+
+
+scripts:
+    automation scripts:
+        swarm-init.sh
+            - init manager, print join tokens.
+        swarm-label.sh
+            - labels like os = linux|windows
+        deploy.sh
+            - docker stack deploy -c stacks/monitoring.stack.yml lgtm
+        teardown.sh
+            - docker stack rm lgtm
+        validate.sh
+            - quick healthy checks (for all containers)
+                - prometheus targets up?
+                - ports are available?
+                - grafana rachable?
+
+
+.env
+    - secrets or environment variables
+    - the stack file referenced these with ${variable_name}
+
+
+Makefile
+    - used for common flows (it will use the .env)
