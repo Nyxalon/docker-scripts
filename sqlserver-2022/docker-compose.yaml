@@ -1,0 +1,25 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: os_sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=404NotFound!
+    ports:  
+      # HostPort:ContainerPort
+      # Change the HostPort (left side) to your preferred custom port, e.g. "15000:1433"
+      - "53001:1433"
+    volumes:
+      - data:/var/opt/mssql
+    networks:
+      # Change 'os' to your preferred custom network name, e.g. 'custom_network'
+      - os
+    restart: always
+
+networks:
+  os:
+    name: os  # Change this to your preferred custom network name
+    external: true
+
+volumes:
+  data:
