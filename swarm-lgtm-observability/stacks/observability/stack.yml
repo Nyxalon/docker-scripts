@@ -1,0 +1,6 @@
+networks:
+  ${OBS_NET}:
+    driver: overlay
+    attachable: true
+  ${TRAEFIK_PUBLIC}:
+    external: true

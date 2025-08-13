@@ -1,0 +1,3 @@
+networks:
+  ${TRAEFIK_PUBLIC}:
+    external: true
