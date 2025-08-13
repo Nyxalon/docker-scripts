@@ -1,0 +1,20 @@
+# general
+.DS_Store
+*.log
+*.tmp
+
+# node/grafana exports
+node_modules/
+
+# docker
+*.env
+.env
+secrets/*
+!secrets/.gitkeep
+
+# editor/IDE
+.vscode/
+.idea/
+
+# custom files
+notes/*
