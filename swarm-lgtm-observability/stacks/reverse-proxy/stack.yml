@@ -1,3 +1,45 @@
 networks:
-  ${TRAEFIK_PUBLIC}:
+  traefik-public:
     external: true
+
+services:
+  traefik:
+    image: traefik:v3.0
+    command:
+      - "--log.level=INFO"
+      - "--api.insecure=true"
+      - "--entrypoints.web.address=:80"
+
+      # v3 Swarm provider (replaces docker.swarmMode)
+      - "--providers.swarm=true"
+      - "--providers.swarm.endpoint=unix:///var/run/docker.sock"
+      - "--providers.swarm.exposedByDefault=false"
+      # (optional) explicitly set the network used for routing:
+      - "--providers.swarm.network=traefik-public"
+
+    ports:
+      - "80:80"
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/api/rawdata"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+    deploy:
+      placement:
+        constraints:
+          - "node.role == manager"
+      restart_policy:
+        condition: any
+        delay: 3s
+        max_attempts: 10
+        window: 30s
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.traefik-ping.rule=PathPrefix(`/ping`)"
+        - "traefik.http.routers.traefik-ping.entrypoints=web"
+        - "traefik.http.services.traefik-ping.loadbalancer.server.port=8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - traefik-public
