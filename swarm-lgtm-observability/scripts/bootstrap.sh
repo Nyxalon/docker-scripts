@@ -23,14 +23,18 @@ echo ""
 echo "debug: ensuring swarm is initialized..."
 if [[ $(docker info --format '{{.Swarm.LocalNodeState}}') == 'inactive' ]]; then
   # change the --advertise-addr to the actual one.
-  if docker swarm init --advertise-addr eth0 &>/dev/null; then
+  if docker swarm init --advertise-addr ${SWARM_ADVERTISE_ADDR} &>/dev/null; then
     echo "info: swarm initialized."
+
+    docker swarm join-token worker
   else
     echo "error: failed to initialize swarm."
     exit 1
   fi
 else
   echo "info: swarm already active."
+
+  docker swarm join-token worker
 fi
 
 # checking docker and swarm networks

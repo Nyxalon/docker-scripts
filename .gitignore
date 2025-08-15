@@ -9,6 +9,7 @@ node_modules/
 # docker
 *.env
 .env
+!.env.example
 secrets/*
 !secrets/.gitkeep
 
